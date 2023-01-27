@@ -15,6 +15,7 @@ from pyftdi.gpio import GpioController
 import serial
 import pyftdi.serialext
 import time, struct, binascii, code, os
+import sys
 
 
 def hexdump(data, label=None, indent='', address_width=8, f=sys.stdout):
@@ -55,10 +56,9 @@ def hexdump(data, label=None, indent='', address_width=8, f=sys.stdout):
 
         f.write(''.join([
             c if isprint(c) else '.'
-            for c in tostr(data[row_start:row_start + real_data])
+            for c in str(data[row_start:row_start + real_data])
         ]))
         f.write((" " * (bytes_per_row - real_data)) + "|\n")
-
 
 def delay(amount):
     # FIXME
@@ -112,7 +112,7 @@ class Reset:
         self.gpio.write_port(WIRE_RESET | WIRE_TOOL0)
         delay(.01)
         # stop driving TOOL0 (with this ftdi device - another one takes over)
-        self.gpio.set_direction(pins=WIRE_RESET, direction=WIRE_RESET)
+        self.gpio.set_direction(pins=WIRE_RESET | WIRE_TOOL0, direction=WIRE_RESET)
 
 
 def read_all(port, size, timeout=1.0, verbose=False):
@@ -440,15 +440,18 @@ class RL78:
 
     def __init__(self, gpio_url, uart_port=None, verbose=False):
         self.verbose = verbose
+        print("Opening reset controller as %s..." % gpio_url)
         self.reset_ctl = Reset(gpio_url)
         # input("Press Enter to continue...")
         if not uart_port:
-            print("Opening as pyftdi...")
+            assert 0, "pyftdi read bug. do not use this"
+            print("Opening serial as pyftdi...")
             # Original code used serial.Serial
             # However claiming with pyftdi unbinds kernel device
             self.port = pyftdi.serialext.serial_for_url(
                 gpio_url, baudrate=self.BAUDRATE_INIT, timeout=0, stopbits=2)
         else:
+            print("Opening serial port %s..." % uart_port)
             self.port = serial.Serial(uart_port,
                                       baudrate=self.BAUDRATE_INIT,
                                       timeout=0,
@@ -503,7 +506,7 @@ def main():
         # Default device
         # default='ftdi:///1',
         help='FTDI GPIO URL')
-    parser.add_argument('--uart-port', default='', help='FTDI device')
+    parser.add_argument('--uart-port', default="COM5", help='FTDI device')
     parser.add_argument('--verbose', action="store_true")
     args = parser.parse_args()
 
