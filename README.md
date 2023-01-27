@@ -1,6 +1,10 @@
 See also an rp2040 fork of this project:
 https://github.com/JohnDMcMaster/rprl78-src
 
+WARNING: only works on Windows
+(difference in kernel driver + pyftdi bug)
+
+
 # Hardware setup
 
 You need something like this:
@@ -29,6 +33,7 @@ You need something like this:
 
 You will then need to connect this to your target board, such as by attaching to
 a 14 pin Renesas emulator connector
+
 
 # API / usage
 
