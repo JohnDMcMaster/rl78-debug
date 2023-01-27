@@ -59,6 +59,7 @@ def hexdump(data, label=None, indent='', address_width=8, f=sys.stdout):
         ]))
         f.write((" " * (bytes_per_row - real_data)) + "|\n")
 
+
 def delay(amount):
     # FIXME
     # time.sleep(0.1)
